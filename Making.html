@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>밈 제작 사이트 - MemeMaker</title>
+
+    <link rel="stylesheet" href="css/Css_of_Making.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.js"
+        integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
+
+    <script>
+        $(document).ready(function () //사진코드를 잘 모르겠나요? 토글버튼
+        {
+            $("#example").hide();
+
+            $("#exshow").click(function () {
+                $("#example").toggle(); 
+            });
+        })
+
+        function text() { //폼 입력값을 제이쿼리로 받아오는 함수 + 잘못된 입력값 검토 후 경고 
+            var top = $('input#Top').val();
+            var bottom = $('input#Bottom').val();
+            var code = $('input#code').val();    //제이쿼리로 입력값들을 val함수로 받아와서 변수에 저장
+
+            if (top == "") {
+                alert("상단 텍스트의 입력값이 공백입니다!");
+                TB.Top.focus();
+                return;
+            }
+
+            else if (bottom == "") {
+                alert("하단 텍스트의 입력값이 공백입니다!");
+                TB.Bottom.focus();
+                return;
+            }
+
+            else if (code == "") {
+                alert("사진 코드의 입력값이 공백입니다!");
+                Code.code.focus();
+                return;
+            }
+            
+
+            var url = "https://ronreiter-meme-generator.p.rapidapi.com/meme?meme=" + code + "&bottom=" + bottom + "&top=" + top + "&font=Impact&font_size=50";
+
+            return url;
+            //입력값 기반으로 GET방식의 주소 입력 후 URL 리턴
+        }
+
+
+        function base64encode(str) { //I didn't do it on my own..
+            var CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+            var out = "", i = 0, len = str.length, c1, c2, c3;
+            while (i < len) {
+                c1 = str.charCodeAt(i++) & 0xff;
+                if (i == len) {
+                    out += CHARS.charAt(c1 >> 2);
+                    out += CHARS.charAt((c1 & 0x3) << 4);
+                    out += "==";
+                    break;
+                }
+                c2 = str.charCodeAt(i++);
+                if (i == len) {
+                    out += CHARS.charAt(c1 >> 2);
+                    out += CHARS.charAt(((c1 & 0x3) << 4) | ((c2 & 0xF0) >> 4));
+                    out += CHARS.charAt((c2 & 0xF) << 2);
+                    out += "=";
+                    break;
+                }
+                c3 = str.charCodeAt(i++);
+                out += CHARS.charAt(c1 >> 2);
+                out += CHARS.charAt(((c1 & 0x3) << 4) | ((c2 & 0xF0) >> 4));
+                out += CHARS.charAt(((c2 & 0xF) << 2) | ((c3 & 0xC0) >> 6));
+                out += CHARS.charAt(c3 & 0x3F);
+            }
+            return out;
+        }
+
+        function generatememe() {
+            var juso = text();
+
+            const settings =
+            {
+                "async": true,
+                "crossDomain": true,
+                "url": juso,
+                "method": "GET",
+                "mimeType": "text/plain; charset=x-user-defined",
+                "headers": {
+                    "x-rapidapi-key": "b0eb3dde90msh860929bffbf2abap126a2fjsn1dc0a6042470",
+                    "x-rapidapi-host": "ronreiter-meme-generator.p.rapidapi.com"
+                }
+            };
+
+            $.ajax(settings).done(function (response) {
+                console.log(response);
+                $("#image").attr('src', 'data:image/jpeg;base64,' + base64encode(response));
+            });
+        }
+
+    </script>
+
+</head>
+
+<body>
+    <div>
+        <h1 style="font-size: 40px;">Meme maker</h1>
+    </div>
+
+    <details>
+        <summary><span>클릭하여 토글 피고 접기</span> &lt;- Click!</summary> <!--[추가 구현] html 태그로 토글 구현-->
+        <p style="display: inline-block;">
+        <figure>
+            <img src="http://placedog.net/300/300?random">
+            <figcaption>랜덤한 강아지 사진입니다.<br><b>윈도우 캡처 도구</b>를 통해 이미지를 다운받아보세요.<br><br>
+                다른 이미지를 원하신다면 아래 새로고침 버튼을 눌러주세요.</figcaption><br>
+        </figure>
+        <button onclick="window.location.reload()" id="reload">새로고침</button> <!--[추가 구현] reload함수로 새로고침 버튼 구현-->
+        </p>
+    </details>
+    <br><br>
+
+    <div class="box1"><!--사진 코드 입력 폼-->
+        <p>사진에 해당하는 코드를 입력해야 합니다.</p>
+        <p>예시 사진들의 코드는 <a href="http://apimeme.com/" target="_blank">여기</a>를 클릭하세요.</p>
+        <p>위의 사이트에서 원하는 사진의 제목을 코드로 입력해주세요.</p><br>
+        <form name="Code">
+            <label for="code">사진 코드 : </label>
+            <input type="text" id="code" name="code">
+        </form>
+
+
+    </div>
+
+    <div class="box1"><!--상 하단 텍스트 입력 폼-->
+
+        <p>사진에 들어갈 원하는 상하단 글자들을 밑에 입력해주세요.</p>
+        <br>
+        <form name="TB">
+            <label for="Toptext">상단 글자 : </label>
+            <input type="text" id="Top" name="Top"> <br><br>
+
+            <label for="Bottomtext">하단 글자 : </label>
+            <input type="text" id="Bottom" name="Bottom"><br><br>
+
+        </form>
+    </div>
+    <br><br>
+
+
+    <ul><!--사진코드를 잘 모르겠나요? 제이쿼리로 토글 구현-->
+        <li><button id="exshow">사진 코드를 잘 모르겠나요?</button></li>
+        <li id="example">
+            <figure><img src="./img/예시.PNG">
+                <figcaption>이 경우 사진 코드는 <b>Big Bird</b></figcaption>
+            </figure>
+        </li>
+
+        <li><b>결과 이미지는 .jpg 또는 .jpeg의 확장자로 리턴됩니다!</b><br></li>
+
+        <li><b>사진 코드를 정확히 입력하지 않으면 에러가 발생합니다.</b></li>
+
+        <li> <input type="button" value="생성하기" name="Click" onclick="generatememe()" id="create">
+        </li>
+    </ul>
+    <br>
+    <br><br>
+
+    <img src="" id="image">
+</body>
+
+</html>
